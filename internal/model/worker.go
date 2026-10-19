@@ -12,19 +12,18 @@ type Worker struct {
 	Name string
 }
 
-func (w *Worker) ExecuteTask(task *Task, results chan *Result) {
+func (w *Worker) ExecuteTask(ctx context.Context, task *Task, results chan *Result) error {
 
-	ctx := context.Background()
 	cancel := context.CancelFunc(func() {})
 	if task.Timeout > 0 {
-		ctx, cancel = context.WithTimeout(context.Background(), task.Timeout)
+		ctx, cancel = context.WithTimeout(ctx, task.Timeout)
 
 	}
 	defer cancel()
 
 	result := &Result{
 		TaskID: task.ID,
-		Output: fmt.Sprintf("Worker %d(%s) performed task %d", w.ID, w.Name, task.ID),
+		Output: fmt.Sprintf("%s performed task %d, data: %s", w.Name, task.ID, task.Data),
 	}
 
 	seconds := rand.Intn(3) + 1
@@ -34,8 +33,11 @@ func (w *Worker) ExecuteTask(task *Task, results chan *Result) {
 	case <-ctx.Done():
 		result.Err = fmt.Errorf("task %d was cancelled", task.ID)
 		results <- result
+		return result.Err
 	case <-time.After(sleepDuration):
 		results <- result
 	}
+
+	return nil
 
 }

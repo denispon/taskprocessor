@@ -1,0 +1,10 @@
+{
+	"github.copilot.inlineSuggest.enable": false,
+	
+	"[go]": {
+  		"editor.inlineSuggest.enabled": false
+	},
+	"gopls": {
+  		"ui.completion.usePlaceholders": true
+	},
+}
